@@ -1,26 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import mapboxgl from 'mapbox-gl'
+import './App.css'
+import tokyo23 from './tokyo23.json'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  componentDidMount() {
+    let map = new mapboxgl.Map({
+      container: this.container,
+      style: 'mapbox://styles/mapbox/light-v10',
+      center: [139.69167, 35.68944],
+      zoom: 10,
+    });
+    map.on('load', function() {
+      map.addSource('tokyo23', {
+        type: 'geojson',
+        data: tokyo23
+      });
+      map.addLayer({
+        'id': 'tokyo23-layer',
+        'type': 'fill',
+        'source': 'tokyo23',
+        'layout': {},
+        'paint': {
+          'fill-outline-color': '#3e6aa2',
+          'fill-color': '#d6e1ef',
+          'fill-opacity': 0.8
+        }
+      });
+    });
+    map.addControl(new mapboxgl.NavigationControl()); 
+  }
+
+  render() {
+    return <div className={'map'} ref={e => (this.container = e)} />
+  }
 }
 
-export default App;
+export default App
