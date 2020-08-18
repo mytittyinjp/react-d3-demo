@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import mapboxgl from 'mapbox-gl'
 import './App.css'
-import tokyo23 from './tokyo23.json'
+import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import tokyo23 from './tokyo23.json'
 
 class App extends Component {
   componentDidMount() {
