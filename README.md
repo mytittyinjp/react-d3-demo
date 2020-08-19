@@ -120,6 +120,18 @@ you can display GIS data
     return <svg ref={node => this.node = node}></svg>
   }
 
+modified fill style
+you can change fill color for each data
+
+    var map = svg.selectAll("path")
+            .data(tokyo.features)
+            .enter()
+            .append("path")
+            .attr("d", geoPath)
+            .style("stroke", "#ffffff")
+            .style("stroke-width", 0.1)
+            .style("fill", function(d){return fill[d.id]});
+
 reference site 
-https://qiita.com/napinoco/items/230737128f490f277247
-https://bl.ocks.org/shimizu/5f4cee0fddc7a64b55a9
+https://github.com/niiyz/JapanCityGeoJson
+https://qiita.com/sand/items/422d4fab77ea8f69dfdf
