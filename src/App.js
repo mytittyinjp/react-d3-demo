@@ -1,39 +1,50 @@
 import React, { Component } from 'react'
 import './App.css'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
-import tokyo23 from './tokyo23.json'
+import tokyo23 from './tokyo23.geojson'
+import * as d3 from 'd3'; 
 
 class App extends Component {
   componentDidMount() {
-    let map = new mapboxgl.Map({
-      container: this.container,
-      style: 'mapbox://styles/mapbox/light-v10',
-      center: [139.69167, 35.68944],
-      zoom: 10,
-    });
-    map.on('load', function() {
-      map.addSource('tokyo23', {
-        type: 'geojson',
-        data: tokyo23
+    const node = this.node
+    d3.json(tokyo23).then(function(japan) {
+      var width = 1000;
+      var height = 600;
+      var scale = 80000;
+      var aProjection = d3.geoMercator()
+          .center([139.69167, 35.68944])
+          .translate([width/2, height/2])
+          .scale(scale);
+      var geoPath = d3.geoPath().projection(aProjection);
+      var svg = d3.select(node).attr("width",width).attr("height",height);
+
+      //マップ描画
+      var map = svg.selectAll("path").data(japan.features)
+        .enter()
+        .append("path")
+          .attr("d", geoPath)
+          .style("stroke", "#ffffff")
+          .style("stroke-width", 0.1)
+          .style("fill", "#5EAFC6");
+
+      //ズームイベント設定    
+      var zoom = d3.zoom().on('zoom', function(){
+          aProjection.scale(scale * d3.event.transform.k);
+          map.attr('d', geoPath);
       });
-      map.addLayer({
-        'id': 'tokyo23-layer',
-        'type': 'fill',
-        'source': 'tokyo23',
-        'layout': {},
-        'paint': {
-          'fill-outline-color': '#3e6aa2',
-          'fill-color': '#d6e1ef',
-          'fill-opacity': 0.8
-        }
+      svg.call(zoom);
+
+      //ドラッグイベント設定
+      var drag = d3.drag().on('drag', function(){
+          var tl = aProjection.translate();
+          aProjection.translate([tl[0] + d3.event.dx, tl[1] + d3.event.dy]);
+          map.attr('d', geoPath);
       });
+      map.call(drag);
     });
-    map.addControl(new mapboxgl.NavigationControl()); 
   }
 
   render() {
-    return <div className={'map'} ref={e => (this.container = e)} />
+    return <svg ref={node => this.node = node}></svg>
   }
 }
 
