@@ -135,3 +135,34 @@ you can change fill color for each data
 reference site 
 https://github.com/niiyz/JapanCityGeoJson
 https://qiita.com/sand/items/422d4fab77ea8f69dfdf
+
+****************************
+about mapbox + d3
+****************************
+
+add below code to componentDidMount in App.js
+you can display GIS data on mapbox by d3
+
+    map.on('load', function() {
+        d3.json(tokyo23).then(
+            function(data) {
+                map.addSource('tokyo23', {
+                type: 'geojson',
+                data: data
+                });
+                map.addLayer({
+                'id': 'tokyo23-layer',
+                'type': 'fill',
+                'source': 'tokyo23',
+                'paint': {
+                    'fill-outline-color': '#3e6aa2',
+                    'fill-color': '#d6e1ef',
+                    'fill-opacity': 0.8
+                }
+                });
+            }
+        );
+    });
+
+reference site 
+https://docs.mapbox.com/jp/mapbox-gl-js/example/timeline-animation/
