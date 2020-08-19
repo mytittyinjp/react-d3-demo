@@ -3,10 +3,26 @@ import './App.css'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import tokyo23 from './tokyo23.geojson'
-import * as d3 from 'd3';
+import * as d3 from 'd3'
+import axios from 'axios'
+import wards from './wards.json'
 
 class App extends Component {
+
   componentDidMount() {
+
+    var templatures = new Map();
+    wards.wards.forEach(function(ward){
+      axios
+      .get("https://api.openweathermap.org/data/2.5/weather?lat="+ward.lat+"&lon="+ward.lon+"&appid="+process.env.REACT_APP_MAPBOX_OPENWEATHER_API_KEY)
+      .then((results) => {
+          templatures.set(ward.id, results.data.main.temp-273.15);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    });
+
     let map = new mapboxgl.Map({
       container: this.container,
       style: 'mapbox://styles/mapbox/light-v10',
@@ -19,7 +35,12 @@ class App extends Component {
       d3.json(tokyo23).then(
         function (data) {
           for (const feature of data.features) {
-            feature["properties"] = {"templature": (Math.random()*60)-20};
+            if(templatures.has(feature.id)){
+              feature["properties"] = {"templature": templatures.get(feature.id)};
+            }else{
+              feature["properties"] = {"templature": 5};
+            }
+            
           }
           map.addSource('tokyo23', {
             type: 'geojson',
