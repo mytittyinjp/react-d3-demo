@@ -17,7 +17,6 @@ class App extends Component {
       var geoPath = d3.geoPath().projection(aProjection);
       var svg = d3.select(node).attr("width",width).attr("height",height);
 
-      //マップ描画
       var map = svg.selectAll("path").data(japan.features)
         .enter()
         .append("path")
@@ -25,15 +24,13 @@ class App extends Component {
           .style("stroke", "#ffffff")
           .style("stroke-width", 0.1)
           .style("fill", "#5EAFC6");
-
-      //ズームイベント設定    
+ 
       var zoom = d3.zoom().on('zoom', function(){
           aProjection.scale(scale * d3.event.transform.k);
           map.attr('d', geoPath);
       });
       svg.call(zoom);
 
-      //ドラッグイベント設定
       var drag = d3.drag().on('drag', function(){
           var tl = aProjection.translate();
           aProjection.translate([tl[0] + d3.event.dx, tl[1] + d3.event.dy]);
