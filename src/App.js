@@ -8,15 +8,33 @@ import axios from 'axios'
 import wards from './wards.json'
 
 class App extends Component {
-
+  constructor(props){
+    super(props);
+    this.state={
+      colors : [
+        '#78013c',
+        '#e6002f',
+        '#fe8801',
+        '#f9d600',
+        '#fafc00',
+        '#b8fb3a',
+        '#beefff',
+        '#e5fffc',
+        '#0095fe',
+        '#045bff',
+      ]
+    }
+  }
   componentDidMount() {
+    
+    var weatherData = new Map();
+    var hoveredStateId = null;
 
-    var templatures = new Map();
-    wards.wards.forEach(function(ward){
+    wards.wards.forEach(function (ward) {
       axios
       .get("https://api.openweathermap.org/data/2.5/weather?lat="+ward.lat+"&lon="+ward.lon+"&appid="+process.env.REACT_APP_MAPBOX_OPENWEATHER_API_KEY)
       .then((results) => {
-          templatures.set(ward.id, results.data.main.temp-273.15);
+        weatherData.set(ward.id, results);
       })
       .catch((error) => {
         console.log(error);
@@ -29,19 +47,27 @@ class App extends Component {
       center: [139.69167, 35.68944],
       zoom: 10,
     });
-    var hoveredStateId = null;
+
+    map.addControl(new mapboxgl.NavigationControl());
 
     map.on('load', function () {
       d3.json(tokyo23).then(
         function (data) {
           for (const feature of data.features) {
-            if(templatures.has(feature.id)){
-              feature["properties"] = {"templature": templatures.get(feature.id)};
-            }else{
-              feature["properties"] = {"templature": 5};
+            if (weatherData.has(feature.id)) {
+              var item = weatherData.get(feature.id);
+              feature["properties"] = {
+                  "name": item.data.name,
+                  "templature": Math.round((item.data.main.temp-273.15) * 10) / 10,
+                  "weather": item.data.weather[0].main};
+            } else {
+              feature["properties"] = {
+                  "name": "test",
+                  "templature": 5,
+                  "weather": "test"};
             }
-            
           }
+
           map.addSource('tokyo23', {
             type: 'geojson',
             data: data
@@ -56,30 +82,26 @@ class App extends Component {
                 'interpolate',
                 ['linear'],
                 ['get', 'templature'],
-                -20,
-                '#800080',
-                -15,
-                '#010f3b',
-                -10,
-                '#01195b',
                 -5,
-                '#021e80',
+                '#045bff',
                 0,
-                '#0443f9',
+                '#0095fe',
                 5,
-                '#0099fd',
+                '#e5fffc',
                 10,
-                '#b7ebfe',
+                '#beefff',
                 15,
-                '#fffff4',
+                '#b8fb3a',
                 20,
-                '#fefe98',
+                '#fafc00',
                 25,
-                '#fe9a01',
+                '#f9d600',
                 30,
-                '#ff2204',
+                '#fe8801',
+                35,
+                '#e6002f',
                 40,
-                '#b90270'
+                '#78013c',
               ],
               'fill-opacity': [
                 'case',
@@ -117,10 +139,40 @@ class App extends Component {
         }
         hoveredStateId = null;
       });
+
+      map.on('click', 'tokyo23-fills', function(e) {
+        new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(
+          '<h4>'+e.features[0].properties.name+'</h4><table><tbody><tr><td>weather</td><td>'+e.features[0].properties.weather+'</td></tr><tr><td>templature</td><td>'+e.features[0].properties.templature+'℃</td></tr></tbody></table>'
+        )
+        .addTo(map);
+        });
     });
   }
   render() {
-    return <div className={'map'} ref={e => (this.container = e)} />
+    return (
+      <div>
+        <div className={'map'} ref={e => (this.container = e)} />
+        <div className='map-overlay top'>
+          <div className='map-overlay-inner'>
+            <h4>Templature</h4>
+            <table>
+              <tbody>
+                {this.state.colors.map((color, index) => {
+                  return (
+                    <tr key={index}>
+                      <td style={{backgroundColor: color}}></td>
+                      <td style={{textAlign: "center"}}>{40-(index*5)+'℃'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
   }
 
 }
