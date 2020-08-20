@@ -51,7 +51,7 @@ class App extends Component {
             'type': 'fill',
             'source': 'tokyo23',
             'paint': {
-              'fill-outline-color': '#3e6aa2',
+              'fill-outline-color': 'white',
               'fill-color': [
                 'interpolate',
                 ['linear'],
