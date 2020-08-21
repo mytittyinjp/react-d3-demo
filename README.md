@@ -215,6 +215,26 @@ you can change fill-color each wards
         }
     });
 
-
 reference site 
 https://docs.mapbox.com/jp/mapbox-gl-js/example/timeline-animation/
+
+****************************
+about OpenWeatherAPI
+****************************
+
+yarn add axios
+
+add below code to componentDidMount in App.js
+you can send http request
+
+    axios
+    .get("https://api.openweathermap.org/data/2.5/weather?lat="+ward.lat+"&lon="+ward.lon+"&appid="+process.env.REACT_APP_MAPBOX_OPENWEATHER_API_KEY)
+    .then((results) => {
+        weatherData.set(ward.id, results);
+    })
+    .catch((error) => {
+        console.log(error);
+    });
+
+reference site
+https://qiita.com/gcyagyu/items/4d186df2e90c53228951

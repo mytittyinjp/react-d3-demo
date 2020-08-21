@@ -35,6 +35,7 @@ class App extends Component {
       .get("https://api.openweathermap.org/data/2.5/weather?lat="+ward.lat+"&lon="+ward.lon+"&appid="+process.env.REACT_APP_MAPBOX_OPENWEATHER_API_KEY)
       .then((results) => {
         weatherData.set(ward.id, results);
+        
       })
       .catch((error) => {
         console.log(error);
@@ -59,12 +60,16 @@ class App extends Component {
               feature["properties"] = {
                   "name": item.data.name,
                   "templature": Math.round((item.data.main.temp-273.15) * 10) / 10,
-                  "weather": item.data.weather[0].main};
+                  "weather": item.data.weather[0].main,
+                  "humidity": item.data.main.humidity
+                };
             } else {
               feature["properties"] = {
                   "name": "test",
                   "templature": 5,
-                  "weather": "test"};
+                  "weather": "test",
+                  "humidity": "10"
+                };
             }
           }
 
@@ -144,7 +149,7 @@ class App extends Component {
         new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(
-          '<h4>'+e.features[0].properties.name+'</h4><table><tbody><tr><td>weather</td><td>'+e.features[0].properties.weather+'</td></tr><tr><td>templature</td><td>'+e.features[0].properties.templature+'℃</td></tr></tbody></table>'
+          '<h4>'+e.features[0].properties.name+'</h4><table><tbody><tr><td>weather</td><td>'+e.features[0].properties.weather+'</td></tr><tr><td>templature</td><td>'+e.features[0].properties.templature+'℃</td></tr><tr><td>humidity</td><td>'+e.features[0].properties.humidity+'%</td></tr></tbody></table>'
         )
         .addTo(map);
         });
